@@ -9,13 +9,14 @@ public static class Program
     private const string ConnectionString =
         "DefaultEndpointsProtocol=https;AccountName=blobtestacount;AccountKey=oFLFwmDKeSw36qs6qV6kywq2ffTK4vGA2xUb3dmf4vNmhR9k9GBsnA1uGEhqmczAdpKd5UNOrW7++ASt/wl4+A==;EndpointSuffix=core.windows.net";
 
+
     private const string ContainerName = "attacktest";
     private const string FileName = "attackfile";
 
     private static async Task Main()
     {
         var taskList = new List<Task<int>>();
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 200; i++)
         {
             var task = Inclement();
             taskList.Add(task);
@@ -23,10 +24,9 @@ public static class Program
 
         await Task.WhenAll(taskList);
 
-        foreach (var task in taskList)
-        {
-            Console.WriteLine(task.Result);
-        }
+        var str = taskList.Aggregate("", (current, task) => current + (task.Result + " ,"));
+
+        Console.WriteLine(str);
     }
 
     private static async Task<int> Inclement()
@@ -47,9 +47,9 @@ public static class Program
             }
             catch (Exception)
             {
-                Console.WriteLine("アクセス権がないので１秒待ちます");
-                //失敗したら1秒後再攻撃
-                await Task.Delay(1000);
+                Console.WriteLine("アクセス権がないので0.１秒待ちます");
+                //失敗したら0.1秒後再攻撃
+                await Task.Delay(100);
             }
         }
 
@@ -71,9 +71,6 @@ public static class Program
         {
             Console.WriteLine(e);
         }
-
-        //ロック確認のためにわざと２秒待機
-        await Task.Delay(2000);
 
         nextValue++;
 
